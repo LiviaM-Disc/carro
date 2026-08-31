@@ -6,6 +6,7 @@ from scripts.cenas import Menu, Partida
 LARGURA_TELA = 480
 ALTURA_TELA = 720
 FPS = 60
+TEMPO_DELTA_MAXIMO = 1 / 30
 
 
 def main():
@@ -24,26 +25,37 @@ def main():
     cena_atual = "menu"
     rodando = True
 
-    while rodando:
-        tempo_delta = relogio.tick(FPS) / 1000
-        eventos = pygame.event.get()
+    try:
+        while rodando:
+            tempo_delta = min(relogio.tick(FPS) / 1000, TEMPO_DELTA_MAXIMO)
+            eventos = pygame.event.get()
 
-        for evento in eventos:
-            if evento.type == pygame.QUIT:
+            for evento in eventos:
+                if evento.type == pygame.QUIT:
+                    rodando = False
+
+            if not rodando:
+                break
+
+            proxima_cena = cenas[cena_atual].atualizar(eventos, tempo_delta)
+
+            if proxima_cena == "sair":
                 rodando = False
+                continue
 
-        proxima_cena = cenas[cena_atual].atualizar(eventos, tempo_delta)
+            if proxima_cena not in cenas:
+                raise ValueError(f"Cena desconhecida: {proxima_cena}")
 
-        if proxima_cena != cena_atual:
-            cena_atual = proxima_cena
+            if proxima_cena != cena_atual:
+                cena_atual = proxima_cena
 
-            if cena_atual == "partida":
-                cenas["partida"].reiniciar()
+                if cena_atual == "partida":
+                    cenas["partida"].reiniciar()
 
-        cenas[cena_atual].desenhar(tela)
-        pygame.display.flip()
-
-    pygame.quit()
+            cenas[cena_atual].desenhar(tela)
+            pygame.display.flip()
+    finally:
+        pygame.quit()
 
 
 if __name__ == "__main__":

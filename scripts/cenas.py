@@ -22,6 +22,10 @@ class Menu:
     def atualizar(self, eventos, tempo_delta):
         self.estado = "menu"
 
+        for evento in eventos:
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+                return "sair"
+
         if self.botao_jogar.clicou(eventos):
             self.estado = "partida"
 
@@ -64,6 +68,11 @@ class Partida:
 
     def atualizar(self, eventos, tempo_delta):
         self.estado = "partida"
+
+        for evento in eventos:
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+                return "menu"
+
         self.jogador.atualizar(tempo_delta)
         self._atualizar_pontos(tempo_delta)
         self._atualizar_obstaculos(tempo_delta)
@@ -88,16 +97,16 @@ class Partida:
     def _atualizar_pontos(self, tempo_delta):
         self.contador_pontos += tempo_delta
 
-        if self.contador_pontos >= 1:
+        while self.contador_pontos >= 1:
             self.pontos += 1
-            self.contador_pontos = 0
+            self.contador_pontos -= 1
 
     def _atualizar_obstaculos(self, tempo_delta):
         self.contador_obstaculo += tempo_delta
 
-        if self.contador_obstaculo >= self.intervalo_obstaculo:
+        while self.contador_obstaculo >= self.intervalo_obstaculo:
             self.obstaculos.append(Obstaculo(self.area_pista, self.velocidade_obstaculo))
-            self.contador_obstaculo = 0
+            self.contador_obstaculo -= self.intervalo_obstaculo
 
         for obstaculo in self.obstaculos:
             obstaculo.velocidade = self.velocidade_obstaculo
@@ -108,7 +117,7 @@ class Partida:
         ]
 
     def _aumentar_dificuldade(self):
-        self.velocidade_obstaculo = 260 + self.pontos * 9
+        self.velocidade_obstaculo = min(620, 260 + self.pontos * 9)
         self.intervalo_obstaculo = max(0.42, 0.9 - self.pontos * 0.01)
 
     def _jogador_colidiu(self):

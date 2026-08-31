@@ -3,6 +3,9 @@ from pathlib import Path
 import pygame
 
 
+CAMINHO_ASSETS = Path(__file__).resolve().parents[1] / "assets"
+
+
 class Jogador:
     def __init__(self, tamanho_tela, area_pista):
         self.largura_tela, self.altura_tela = tamanho_tela
@@ -11,7 +14,10 @@ class Jogador:
         self.largura = 54
         self.altura = 72
 
-        caminho_imagem = Path(__file__).resolve().parents[1] / "assets" / "carro.png"
+        caminho_imagem = CAMINHO_ASSETS / "carro.png"
+        if not caminho_imagem.exists():
+            raise FileNotFoundError(f"Imagem do jogador nao encontrada: {caminho_imagem}")
+
         imagem = pygame.image.load(caminho_imagem).convert_alpha()
         self.imagem = pygame.transform.scale(imagem, (self.largura, self.altura))
         self.retangulo = self.imagem.get_rect(midbottom=(self.largura_tela // 2, self.altura_tela - 34))

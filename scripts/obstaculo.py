@@ -4,6 +4,9 @@ from random import randint
 import pygame
 
 
+CAMINHO_ASSETS = Path(__file__).resolve().parents[1] / "assets"
+
+
 class Obstaculo:
     imagem_base = None
 
@@ -14,13 +17,19 @@ class Obstaculo:
         self.altura = 50
 
         if Obstaculo.imagem_base is None:
-            caminho_imagem = Path(__file__).resolve().parents[1] / "assets" / "cone.png"
+            caminho_imagem = CAMINHO_ASSETS / "cone.png"
+            if not caminho_imagem.exists():
+                raise FileNotFoundError(f"Imagem do obstaculo nao encontrada: {caminho_imagem}")
+
             imagem = pygame.image.load(caminho_imagem).convert_alpha()
             Obstaculo.imagem_base = pygame.transform.scale(imagem, (self.largura, self.altura))
 
         self.imagem = Obstaculo.imagem_base
         x_minimo = self.area_pista.left + 16
         x_maximo = self.area_pista.right - self.largura - 16
+        if x_minimo > x_maximo:
+            raise ValueError("A area da pista e estreita demais para criar obstaculos.")
+
         self.retangulo = self.imagem.get_rect(topleft=(randint(x_minimo, x_maximo), -self.altura))
         self.posicao_y = float(self.retangulo.y)
 

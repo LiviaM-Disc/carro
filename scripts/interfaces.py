@@ -7,11 +7,11 @@ class Texto:
         self.fonte = pygame.font.Font(None, tamanho)
         self.cor = cor
         self.centro = centro
+        self.imagem = self.fonte.render(self.mensagem, True, self.cor)
+        self.retangulo = self.imagem.get_rect(center=self.centro)
 
     def desenhar(self, tela):
-        imagem = self.fonte.render(self.mensagem, True, self.cor)
-        retangulo = imagem.get_rect(center=self.centro)
-        tela.blit(imagem, retangulo)
+        tela.blit(self.imagem, self.retangulo)
 
 
 class Botao:
@@ -24,11 +24,12 @@ class Botao:
         self.fonte = pygame.font.Font(None, 42)
 
     def clicou(self, eventos):
-        mouse_pos = pygame.mouse.get_pos()
-        mouse_em_cima = self.retangulo.collidepoint(mouse_pos)
-
         for evento in eventos:
-            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1 and mouse_em_cima:
+            if (
+                evento.type == pygame.MOUSEBUTTONDOWN
+                and evento.button == 1
+                and self.retangulo.collidepoint(evento.pos)
+            ):
                 return True
 
             if evento.type == pygame.KEYDOWN and evento.key in (pygame.K_RETURN, pygame.K_SPACE):
